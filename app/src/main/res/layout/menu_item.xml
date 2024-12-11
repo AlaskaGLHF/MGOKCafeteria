@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:background="@drawable/card_background"
+    android:layout_margin="8dp">
+
+    <!-- Изображение блюда -->
+    <ImageView
+        android:id="@+id/menuItemImage"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/image_desc" />
+
+    <!-- Название блюда -->
+    <TextView
+        android:id="@+id/menuItemName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Название блюда"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:gravity="center" />
+
+    <!-- Цена блюда -->
+    <TextView
+        android:id="@+id/menuItemPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Цена блюда"
+        android:textSize="14sp"
+        android:gravity="center" />
+</LinearLayout>

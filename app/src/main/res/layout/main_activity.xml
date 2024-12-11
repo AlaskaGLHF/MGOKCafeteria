@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Логотип -->
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/logo"
+        android:layout_gravity="center"
+        android:contentDescription="@string/logo_desc" />
+
+    <!-- Категории (Просто контейнер) -->
+    <GridLayout
+        android:id="@+id/categoryGridLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Салаты"
+            android:padding="8dp"
+            android:layout_margin="8dp"
+            android:background="@drawable/category_button_background" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Основные"
+            android:padding="8dp"
+            android:layout_margin="8dp"
+            android:background="@drawable/category_button_background" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Десерты"
+            android:padding="8dp"
+            android:layout_margin="8dp"
+            android:background="@drawable/category_button_background" />
+    </GridLayout>
+
+    <!-- Меню с карточками -->
+    <GridLayout
+        android:id="@+id/menuGridLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:columnCount="2"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <!-- Карточка блюда 1 -->
+        <include
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_columnWeight="1"
+            layout="@layout/menu_item" />
+
+        <!-- Карточка блюда 2 -->
+        <include
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_columnWeight="1"
+            layout="@layout/menu_item" />
+
+        <!-- Карточка блюда 3 -->
+        <include
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_columnWeight="1"
+            layout="@layout/menu_item" />
+
+    </GridLayout>
+</LinearLayout>
