@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -111,7 +112,7 @@ fun MainScreen(navController: NavHostController) {
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Text(
-                text = "МГОК Сто́ловая",
+                text = "МГОК Столо́вая",
                 fontSize = 24.sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center
@@ -126,11 +127,15 @@ fun MainScreen(navController: NavHostController) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(categories.size) { index ->
-                    CategoryCard(category = categories[index]) {
+                    CategoryCard(
+                        category = categories[index],
+                        isSelected = selectedCategory == categories[index].id
+                    ) {
                         selectedCategory = categories[index].id
                     }
                 }
             }
+
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -158,16 +163,20 @@ fun MenuItemCard(menuItem: MenuItem, onClick: () -> Unit) {
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
+        modifier = Modifier
+            .width(180.dp) // Увеличенная ширина
+            .height(260.dp) // Увеличенная высота
+            .clickable(onClick = onClick)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            // Блок изображения
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp),
+                    .height(140.dp), // Увеличенная высота изображения
                 contentAlignment = Alignment.Center
             ) {
-                val imageResId = when(menuItem.imagePath) {
+                val imageResId = when (menuItem.imagePath) {
                     "poke_1" -> R.drawable.poke_1
                     "salad_1" -> R.drawable.salad_1
                     "salad_2" -> R.drawable.salad_2
@@ -192,47 +201,74 @@ fun MenuItemCard(menuItem: MenuItem, onClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Блок названия блюда
             Text(
                 text = menuItem.name,
-                fontSize = 16.sp,
+                fontSize = 18.sp, // Увеличенный шрифт
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = Color.Black,
+                maxLines = 2, // Ограничение в 2 строки
+                overflow = TextOverflow.Ellipsis, // Добавление многоточия при переполнении
+                modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "${menuItem.price} ₽",
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
+            // Блок цены
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp)) // Закруглённые края
+                    .background(Color.Black) // Чёрный фон
+                    .padding(horizontal = 8.dp, vertical = 4.dp) // Внутренний отступ
+            ) {
+                Text(
+                    text = "${menuItem.price} ₽",
+                    fontSize = 16.sp,
+                    color = Color.White, // Белый текст
+                    modifier = Modifier.align(Alignment.CenterStart) // Центрирование внутри Box
+                )
+            }
         }
     }
 }
 
+
+
 @Composable
-fun CategoryCard(category: Category, onClick: () -> Unit) {
+fun CategoryCard(category: Category, isSelected: Boolean, onClick: () -> Unit) {
+    val backgroundColor = if (isSelected) Color.Black else Color.LightGray
+    val textColor = if (isSelected) Color.White else Color.Black
+
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .background(Color.LightGray)
+            .background(backgroundColor)
             .padding(12.dp)
     ) {
         Text(
             text = category.name,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = textColor
         )
     }
 }
+
 
 @Composable
 fun DetailsScreen(menuItem: MenuItem, onBack: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Button(onClick = onBack) {
+            Button(
+                onClick = onBack,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black, // Фон кнопки
+                    contentColor = Color.White    // Цвет текста
+                ),
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
                 Text("Назад")
             }
 
@@ -270,7 +306,7 @@ fun DetailsScreen(menuItem: MenuItem, onBack: () -> Unit) {
                 color = Color.Black
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = "Цена: ${menuItem.price} ₽",
@@ -278,7 +314,7 @@ fun DetailsScreen(menuItem: MenuItem, onBack: () -> Unit) {
                 color = Color.Gray
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Блок БЖУ
             Text("БЖУ на 100 г:", fontSize = 16.sp)
@@ -296,3 +332,6 @@ fun DetailsScreen(menuItem: MenuItem, onBack: () -> Unit) {
         }
     }
 }
+
+
+
