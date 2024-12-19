@@ -7,62 +7,108 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.mgokcafeteria.ui.theme.MGOKCafeteriaTheme
 
-// Обновленная структура MenuItem с category_id
+
+val budgetMealType = MealType(id = 1, name = "Бюджетный")
+val paidMealType = MealType(id = 2, name = "Платный")
+
 val menuItems = listOf(
-    MenuItem("Поке с курицей и сыром", "poke_1", 450.00, 8.916, 6.216, 162.492, 120, 450, "Мясо кур (п/ф бедро, голень, грудка) с/м, Паприка сладкая сухая, Масло растительное, Соль, Помидоры, Огурцы свежие, Салат Айсберг, Сыр с м.д.ж. 45%, Крупа Булгур, Соль", 1),
-    MenuItem("Салат-коктейль из овощей", "salad_1", 150.00, 1.02, 13.656, 76.68, 120, 150, "Салат Айсберг, Кукуруза консервированная, Огурцы свежие, Помидоры", 2),
-    MenuItem("Салат Греческий с брынзой", "salad_2", 200.00, 3.768, 3.8, 109.92, 120, 200, "Сыр Брынза, Огурцы свежие, Перец сладкий свежий, Помидоры, Оливки консервированное, Салат Романо, Базилик сушёный", 2),
-    MenuItem("Масло растительное", "oil", 30.00, 0.0, 0.0, 44.95, 5, 30, "Масло растительное", 3),
-    MenuItem("Соевый соус", "soy_sauce", 25.00, 0.03, 0.205, 2.65, 5, 25, "Соус соевый", 3),
-    MenuItem("Томатный соус", "tomato_sauce", 35.00, 0.15, 0.894, 5.85, 5, 35, "Томат-паста, Масло растительное, Сахар-песок, Орегано, Соль", 3),
-    MenuItem("Шашлычки куриные по-азиатски", "chicken_skewers", 550.00, 38.805, 1.905, 542.325, 150, 550, "Мясо кур (п/ф бедро, голень, грудка) с/м, Соус соевый, Чеснок свежий, Куркума, Имбирь сухой, Кориандр, Соль, Масло растительное, Молоко кокосовое", 1),
-    MenuItem("Сок яблочный", "apple_juice", 80.00, 0.2, 20.2, 92.0, 200, 80, "Сок яблочный", 4),
-    MenuItem("Фрукты свежие в ассортименте", "fresh_fruits", 120.00, 0.3, 9.4, 45.67, 100, 120, "Яблоки свежие, Апельсин, Груши свежие", 5),
-    MenuItem("Круассан", "croissant", 100.00, 30.58, 37.92, 452.1, 80, 100, "Круассан в ассортименте 1/80", 5),
-    MenuItem("Хлебная корзина", "bread_basket", 150.00, 1.61, 31.891, 159.0, 60, 150, "Хлеб пшеничный в нарезке, Хлеб ржано-пшеничный в нарезке, Булочка Столичная", 6)
+
+    //Обед № 1 Бюджет
+    MenuItem("Винегрет", "vinaigrette", 2.5, 0.5, 10.0, 60, 150, "Картофель очищенный, Морковь очищенная, Свекла очищенная, Горошек зеленый консервированный, Огурцы консервированные без уксуса (без учета заливки) ДП", budgetMealType, 1),
+    MenuItem("Поке с овощами и яйцом", "poke_with_vegetables_and_egg", 13.7, 8.244, 11.016, 176, 120, "Яйцо куриное пищевое С1, Масло растительное, Помидоры, Огурцы свежие, Брокколи б/з, Крупа Рисовая, Соль, Масло растительное, Кунжут", budgetMealType, 1),
+    MenuItem("Салат Цезарь", "caesar_salad", 13.7, 8.244, 11.016, 176, 120, "Мясо кур с/м, Помидоры Черри, Хлеб пшеничный, Салат Романо", budgetMealType, 1),
+    MenuItem("Хот-Дог", "hot_dog", 2.8, 2.35, 26.85, 143, 50, "Булочка для хот-дога, Колбаска, Темат-паста", budgetMealType, 1),
+    MenuItem("Картофель фри", "french_fries", 3.69, 3.132, 30.12, 163, 120, "Картофель фри, Масло растительное",budgetMealType, 1),
+    MenuItem("Рисовая лапша с морепродуктами", "rice_noodles_seafood", 18.0, 3.5, 30.0, 220, 200, "Кальмар филе с/м, Рыба филе Трески б/к с/м, Лапша Рисовая, Соль, Масло растительное, Перец б/з, Кабачки 6/3, Морковь очищенная, Лук репчатый очищенный, Соус соевый, Кунжут, Лук зеленый свежий", budgetMealType, 1),
+    MenuItem("Чикен ролл", "chicken_roll", 14.1, 17.49, 36.015, 360, 150, "Тортилья ПП, Мясо кур (п/ф бедро, голень, грудка) с/м, Масло растительное, Перец сладкий свежий, Капуста Пекинская (Салат Китайский), Соус салатный, Помидоры, Сыр с м.д.ж 45%", budgetMealType, 1),
+    MenuItem("Хлебная корзина", "bread_basket", 4.14, 1.61, 31.891, 159, 60, "Хлеб пшеничный в нарезке, Хлеб ржано-пшеничный в нарезке, Булочка Столичная", budgetMealType, 1),
+    MenuItem("Пирожок с яблоком", "apple_pie", 0.57, 0.3, 9.4, 45, 100, "Пирожок с яблоком", budgetMealType, 1),
+    MenuItem("Фрукты свежие в ассортименте", "fresh_fruits", 4.995, 44.95, 5.0, 92, 200, "Яблоки свежие, Апельсин, Груша свежая", budgetMealType, 1),
+    MenuItem("Соуса в ассортименте", "assorted_sauces", 2.0, 0.2, 20.2, 92, 200, "Масло растительное, Соус салатный, Соус соевый, Томат-паста, Соль, Сахар-песок, Орегано", budgetMealType, 1),
+    MenuItem("Чай/Какао на молоке", "tea_cocoa_milk", 0.0, 0.0, 10.0, 50, 200, "Чай черный весовой, Какао-порошок, Молоко, Сахар-песок", budgetMealType, 1),
+    MenuItem("Лимон", "lemon", 0.0, 0.0, 5.0, 20, 50, "Лимон", budgetMealType, 1),
+    MenuItem("Сахар порционный", "portion_sugar", 0.0, 0.0, 5.0, 20, 5, "Сахар порционный 5 гр.", budgetMealType, 1),
+    MenuItem("Сок", "juice", 4.995, 0.2, 20.2, 92, 200, "Сок яблочный", budgetMealType, 1),
+
+    //Обед № 1 Платный
+    MenuItem("Салат Цезарь", "caesar_salad", 13.7, 8.244, 11.016, 176, 120, "Мясо кур с/м, Помидоры Черри, Хлеб пшеничный, Салат Романо", paidMealType, 1),
+    MenuItem("Хот-Дог", "hot_dog", 2.8, 2.35, 26.85, 143, 50, "Булочка для хот-дога, Колбаска, Темат-паста", paidMealType, 1),
+    MenuItem("Картофель фри", "french_fries", 3.69, 3.132, 30.12, 163, 120, "Картофель фри, Масло растительное",paidMealType, 1),
+    MenuItem("Хлебная корзина", "bread_basket", 4.14, 1.61, 31.891, 159, 60, "Хлеб пшеничный в нарезке, Хлеб ржано-пшеничный в нарезке, Булочка Столичная", paidMealType, 1),
+    MenuItem("Пирожок с яблоком", "apple_pie", 0.57, 0.3, 9.4, 45, 100, "Пирожок с яблоком", paidMealType, 1),
+    MenuItem("Фрукты свежие в ассортименте", "fresh_fruits", 4.995, 44.95, 5.0, 92, 200, "Яблоки свежие, Апельсин, Груша свежая", paidMealType, 1),
+    MenuItem("Соуса в ассортименте", "assorted_sauces", 2.0, 0.2, 20.2, 92, 200, "Масло растительное, Соус салатный, Соус соевый, Томат-паста, Соль, Сахар-песок, Орегано", paidMealType, 1),
+    MenuItem("Фрукты свежие в ассортименте", "fresh_fruits", 0.3, 9.4, 45.0, 100, 120, "Яблоки свежие, Апельсин, Груши свежие", paidMealType, 1),
+    MenuItem("Сок", "juice", 4.995, 0.2, 20.2, 92, 200, "Сок яблочный", paidMealType, 1),
+
+    //Обед № 2 Платный
+    MenuItem("Поке с овощами и яйцом", "poke_with_vegetables_and_egg", 13.7, 8.244, 11.016, 176, 120, "Яйцо куриное пищевое С1, Масло растительное, Помидоры, Огурцы свежие, Брокколи б/з, Крупа Рисовая, Соль, Масло растительное, Кунжут", paidMealType, 2),  // mealType = 2 (Платный), mealID = 2
+    MenuItem("Чикен ролл", "chicken_roll", 14.1, 17.49, 36.015, 360, 150, "Тортилья ПП, Мясо кур (п/ф бедро, голень, грудка) с/м, Масло растительное, Перец сладкий свежий, Капуста Пекинская (Салат Китайский), Соус салатный, Помидоры, Сыр с м.д.ж 45%", paidMealType, 2),  // mealType = 2 (Платный), mealID = 2
+    MenuItem("Картофель фри", "french_fries", 3.69, 3.132, 30.12, 163, 120, "Картофель резаный (фри) б/з, Масло растительное, Соль", paidMealType, 2),  // mealType = 2 (Платный), mealID = 2
+    MenuItem("Хлебная корзина", "bread_basket", 4.14, 1.61, 31.891, 159, 60, "Хлеб пшеничный в нарезке, Хлеб ржано-пшеничный в нарезке, Булочка Столичная", paidMealType, 2),  // mealType = 2 (Платный), mealID = 2
+    MenuItem("Пирожок с яблоком", "apple_pie", 0.57, 0.3, 9.4, 45, 100, "Пирожок с яблоком", paidMealType, 2),  // mealType = 2 (Платный), mealID = 2
+    MenuItem("Фрукты свежие в ассортименте", "fresh_fruits", 4.995, 44.95, 5.0, 92, 200, "Яблоки свежие, Апельсин, Груша свежая", paidMealType, 2),  // mealType = 2 (Платный), mealID = 2
+    MenuItem("Соуса в ассортименте", "assorted_sauces", 2.0, 0.2, 20.2, 92, 200, "Масло растительное, Соус салатный, Соус соевый, Томат-паста, Соль, Сахар-песок, Орегано", paidMealType, 2),  // mealType = 2 (Платный), mealID = 2
+    MenuItem("Чай/Какао на молоке", "tea_cocoa_milk", 0.0, 0.0, 10.0, 50, 200, "Чай черный весовой, Какао-порошок, Молоко, Сахар-песок", paidMealType, 2),  // mealType = 2 (Платный), mealID = 2
+    MenuItem("Лимон", "lemon", 0.0, 0.0, 5.0, 20, 50, "Лимон", paidMealType, 2),  // mealType = 2 (Платный), mealID = 2
+    MenuItem("Сахар порционный", "portion_sugar", 0.0, 0.0, 5.0, 20, 5, "Сахар порционный 5 гр.", paidMealType, 2), // mealType = 2 (Платный), mealID = 2
+
+    //Обед № 3 Платный
+    MenuItem("Винегрет", "vinaigrette", 2.5, 0.5, 10.0, 60, 150, "Картофель очищенный, Морковь очищенная, Свекла очищенная, Горошек зеленый консервированный, Огурцы консервированные без уксуса (без учета заливки) ДП", paidMealType, 3),
+    MenuItem("Рисовая лапша с морепродуктами", "rice_noodles_seafood", 18.0, 3.5, 30.0, 220, 200, "Кальмар филе с/м, Рыба филе Трески б/к с/м, Лапша Рисовая, Соль, Масло растительное, Перец б/з, Кабачки 6/3, Морковь очищенная, Лук репчатый очищенный, Соус соевый, Кунжут, Лук зеленый свежий", paidMealType, 3),
+    MenuItem("Хлебная корзина", "bread_basket", 4.14, 1.61, 31.891, 159, 60, "Хлеб пшеничный в нарезке, Хлеб ржано-пшеничный в нарезке, Булочка Столичная", paidMealType, 3),
+    MenuItem("Пирожок с яблоком", "apple_pie", 0.57, 0.3, 9.4, 45, 100, "Пирожок с яблоком", paidMealType, 3),
+    MenuItem("Фрукты свежие в ассортименте", "fresh_fruits", 4.995, 44.95, 5.0, 92, 200, "Яблоки свежие, Апельсин, Груша свежая", paidMealType, 3),
+    MenuItem("Соуса в ассортименте", "assorted_sauces", 2.0, 0.2, 20.2, 92, 200, "Масло растительное, Соус салатный, Соус соевый, Томат-паста, Соль, Сахар-песок, Орегано", paidMealType, 3),
+    MenuItem("Сок", "juice", 4.995, 0.2, 20.2, 92, 200, "Сок яблочный", paidMealType, 3),
+    )
+
+val mealTypes = listOf(
+    MealType(1, "Бюджетные обеды"),
+    MealType(2, "Платные обеды")
 )
 
 data class MenuItem(
     val name: String,
     val imagePath: String,
-    val price: Double,
     val proteins: Double,
     val fats: Double,
     val carbs: Double,
     val calories: Int,
     val weight: Int,
     val ingredients: String,
-    val categoryId: Int
+    val mealType: MealType,
+    val mealID: Int
 )
 
-data class Category(
+data class MealType(
     val id: Int,
     val name: String
 )
@@ -73,14 +119,38 @@ class MainActivity : ComponentActivity() {
         setContent {
             MGOKCafeteriaTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "menu") {
-                    composable("menu") {
+
+                NavHost(
+                    navController = navController,
+                    startDestination = "main"
+                ) {
+                    composable("main") {
                         MainScreen(navController = navController)
                     }
-                    composable("details/{itemIndex}") { backStackEntry ->
-                        val itemIndex = backStackEntry.arguments?.getString("itemIndex")?.toIntOrNull() ?: 0
-                        val menuItem = menuItems[itemIndex]
-                        DetailsScreen(menuItem = menuItem, onBack = { navController.popBackStack() })
+                    composable(
+                        "meal/{mealTypeId}",
+                        arguments = listOf(navArgument("mealTypeId") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val mealTypeId = backStackEntry.arguments?.getInt("mealTypeId") ?: 0
+                        MealScreen(mealTypeId = mealTypeId, selectedMealID = 0, navController = navController)
+                    }
+                    composable(
+                        "meal/{mealTypeId}/{mealNumber}",
+                        arguments = listOf(
+                            navArgument("mealTypeId") { type = NavType.IntType },
+                            navArgument("mealNumber") { type = NavType.IntType }
+                        )
+                    ) { backStackEntry ->
+                        val mealTypeId = backStackEntry.arguments?.getInt("mealTypeId") ?: 0
+                        val mealNumber = backStackEntry.arguments?.getInt("mealNumber") ?: 0
+                        MealScreen(mealTypeId = mealTypeId, selectedMealID = mealNumber, navController = navController)
+                    }
+                    composable(
+                        "details/{mealID}",
+                        arguments = listOf(navArgument("mealID") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val mealID = backStackEntry.arguments?.getInt("mealID") ?: 0
+                        DetailsScreen(menuItems = menuItems, mealID = mealID, onBack = { navController.popBackStack() })
                     }
                 }
             }
@@ -90,29 +160,47 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(navController: NavHostController) {
-    var selectedCategory by remember { mutableStateOf(0) } // Категория по умолчанию "Все"
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "МГОК Столовая",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
 
-    val categories = listOf(
-        Category(0, "Все"), // Новая категория "Все"
-        Category(1, "Основные блюда"),
-        Category(2, "Салаты и закуски"),
-        Category(3, "Соусы и приправы"),
-        Category(4, "Напитки"),
-        Category(5, "Фрукты и десерты"),
-        Category(6, "Хлеб и выпечка")
-    )
+        mealTypes.forEach { mealType ->
+            Button(
+                onClick = { navController.navigate("meal/${mealType.id}") },
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                Text(text = mealType.name)
+            }
+        }
+    }
+}
 
-    // Фильтрация блюд по categoryId
-    val filteredMenuItems = if (selectedCategory == 0) {
-        menuItems // Все блюда, если выбрана категория "Все"
-    } else {
-        menuItems.filter { it.categoryId == selectedCategory }
+@Composable
+fun MealScreen(mealTypeId: Int, selectedMealID: Int, navController: NavHostController) {
+    var selectedMealIDState by remember { mutableStateOf(selectedMealID) }
+
+    val mealNumbers = menuItems
+        .filter { it.mealType.id == mealTypeId }
+        .map { it.mealID }
+        .distinct()
+
+    val filteredMenuItems = menuItems.filter {
+        it.mealType.id == mealTypeId && it.mealID == selectedMealIDState
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Text(
-                text = "МГОК Столо́вая",
+                text = "МГОК Столовая",
                 fontSize = 24.sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center
@@ -120,26 +208,26 @@ fun MainScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Панель категорий с горизонтальной прокруткой
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(categories.size) { index ->
-                    CategoryCard(
-                        category = categories[index],
-                        isSelected = selectedCategory == categories[index].id
-                    ) {
-                        selectedCategory = categories[index].id
+                mealNumbers.forEach { mealNumber ->
+                    item {
+                        MealNumberCard(
+                            mealNumber = mealNumber,
+                            isSelected = selectedMealIDState == mealNumber
+                        ) {
+                            selectedMealIDState = mealNumber
+                            navController.navigate("meal/$mealTypeId/$mealNumber")
+                        }
                     }
                 }
             }
 
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Сетка для отображения фильтрованных блюд
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxWidth(),
@@ -147,191 +235,134 @@ fun MainScreen(navController: NavHostController) {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(filteredMenuItems.size) { index ->
-                    MenuItemCard(menuItem = filteredMenuItems[index]) {
-                        navController.navigate("details/${menuItems.indexOf(filteredMenuItems[index])}")
+                filteredMenuItems.forEach { menuItem ->
+                    item {
+                        MenuItemCard(menuItem = menuItem) {
+                            navController.navigate(route = "details/${menuItem.mealID}")
+                        }
                     }
                 }
             }
         }
     }
 }
-
 @Composable
 fun MenuItemCard(menuItem: MenuItem, onClick: () -> Unit) {
     Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
-            .width(180.dp) // Увеличенная ширина
-            .height(260.dp) // Увеличенная высота
-            .clickable(onClick = onClick)
+            .padding(8.dp)
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(8.dp)
     ) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            // Блок изображения
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp), // Увеличенная высота изображения
-                contentAlignment = Alignment.Center
-            ) {
-                val imageResId = when (menuItem.imagePath) {
-                    "poke_1" -> R.drawable.poke_1
-                    "salad_1" -> R.drawable.salad_1
-                    "salad_2" -> R.drawable.salad_2
-                    "oil" -> R.drawable.oil
-                    "soy_sauce" -> R.drawable.soy_sauce
-                    "tomato_sauce" -> R.drawable.tomato_sauce
-                    "chicken_skewers" -> R.drawable.chicken_skewers
-                    "apple_juice" -> R.drawable.apple_juice
-                    "fresh_fruits" -> R.drawable.fresh_fruits
-                    "croissant" -> R.drawable.croissant
-                    "bread_basket" -> R.drawable.bread_basket
-                    else -> R.drawable.placeholder
-                }
-
-                Image(
-                    painter = painterResource(id = imageResId),
-                    contentDescription = menuItem.name,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Блок названия блюда
-            Text(
-                text = menuItem.name,
-                fontSize = 18.sp, // Увеличенный шрифт
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                maxLines = 2, // Ограничение в 2 строки
-                overflow = TextOverflow.Ellipsis, // Добавление многоточия при переполнении
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Блок цены
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp)) // Закруглённые края
-                    .background(Color.Black) // Чёрный фон
-                    .padding(horizontal = 8.dp, vertical = 4.dp) // Внутренний отступ
-            ) {
-                Text(
-                    text = "${menuItem.price} ₽",
-                    fontSize = 16.sp,
-                    color = Color.White, // Белый текст
-                    modifier = Modifier.align(Alignment.CenterStart) // Центрирование внутри Box
-                )
-            }
-        }
-    }
-}
-
-
-
-@Composable
-fun CategoryCard(category: Category, isSelected: Boolean, onClick: () -> Unit) {
-    val backgroundColor = if (isSelected) Color.Black else Color.LightGray
-    val textColor = if (isSelected) Color.White else Color.Black
-
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
-            .background(backgroundColor)
-            .padding(12.dp)
-    ) {
-        Text(
-            text = category.name,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            color = textColor
-        )
-    }
-}
-
-
-@Composable
-fun DetailsScreen(menuItem: MenuItem, onBack: () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Button(
-                onClick = onBack,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Black, // Фон кнопки
-                    contentColor = Color.White    // Цвет текста
-                ),
-                modifier = Modifier.padding(horizontal = 8.dp)
-            ) {
-                Text("Назад")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Фотография блюда вверху экрана
-            val imageResId = when(menuItem.imagePath) {
-                "poke_1" -> R.drawable.poke_1
-                "salad_1" -> R.drawable.salad_1
-                "salad_2" -> R.drawable.salad_2
-                "oil" -> R.drawable.oil
-                "soy_sauce" -> R.drawable.soy_sauce
-                "tomato_sauce" -> R.drawable.tomato_sauce
-                "chicken_skewers" -> R.drawable.chicken_skewers
-                "apple_juice" -> R.drawable.apple_juice
-                "fresh_fruits" -> R.drawable.fresh_fruits
-                "croissant" -> R.drawable.croissant
-                "bread_basket" -> R.drawable.bread_basket
-                else -> R.drawable.placeholder
-            }
-
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Image(
-                painter = painterResource(id = imageResId),
+                painter = painterResource(id = getImageResource(menuItem.imagePath)),
                 contentDescription = menuItem.name,
-                modifier = Modifier.fillMaxWidth().height(250.dp),
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = menuItem.name,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Цена: ${menuItem.price} ₽",
-                fontSize = 16.sp,
-                color = Color.Gray
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Блок БЖУ
-            Text("БЖУ на 100 г:", fontSize = 16.sp)
-            Text("Белки: ${menuItem.proteins} г", fontSize = 14.sp)
-            Text("Жиры: ${menuItem.fats} г", fontSize = 14.sp)
-            Text("Углеводы: ${menuItem.carbs} г", fontSize = 14.sp)
-            Text("Калории: ${menuItem.calories} ккал", fontSize = 14.sp)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Ингредиенты: ${menuItem.ingredients}",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 fontSize = 14.sp
             )
         }
     }
 }
 
+@Composable
+fun MealNumberCard(mealNumber: Int, isSelected: Boolean, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .size(100.dp)
+            .clickable(onClick = onClick),
+        colors = if (isSelected) {
+            CardDefaults.cardColors(containerColor = Color(0xFFE0F7FA))
+        } else {
+            CardDefaults.cardColors(containerColor = Color.White)
+        },
+        elevation = CardDefaults.cardElevation()
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = "Обед №$mealNumber",
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center,
+                color = if (isSelected) Color.Black else Color.Gray
+            )
+        }
+    }
+}
 
+@Composable
+fun DetailsScreen(menuItems: List<MenuItem>, mealID: Int, onBack: () -> Unit) {
+    val menuItem = menuItems.firstOrNull { it.mealID == mealID }
+
+    if (menuItem != null) {
+        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            Button(onClick = onBack) {
+                Text("Назад")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Image(
+                painter = painterResource(id = getImageResource(menuItem.imagePath)),
+                contentDescription = menuItem.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(menuItem.name, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Белки: ${menuItem.proteins} г, Жиры: ${menuItem.fats} г, Углеводы: ${menuItem.carbs} г")
+            Text("Калории: ${menuItem.calories} ккал")
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Ингредиенты: ${menuItem.ingredients}")
+        }
+    } else {
+        Text(
+            "Блюдо не найдено",
+            modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center)
+        )
+    }
+}
+
+
+            // Helper function to map image path to drawable resource
+            @Composable
+            fun getImageResource(imagePath: String): Int {
+                return when (imagePath) {
+                    "caesar_salad" -> R.drawable.caesar_salad
+                    "hot_dog" -> R.drawable.hot_dog
+                    "french_fries" -> R.drawable.french_fries
+                    "poke_with_vegetables_and_egg" -> R.drawable.poke_with_vegetables_and_egg
+                    "apple_pie" -> R.drawable.apple_pie
+                    "juice" -> R.drawable.juice
+                    "bread_basket" -> R.drawable.bread_basket
+                    "chicken_roll" -> R.drawable.chicken_roll
+                    "chicken_skewers" -> R.drawable.chicken_skewers
+                    "fresh_fruits" -> R.drawable.fresh_fruits
+                    "lemon" -> R.drawable.lemon
+                    "portion_sugar" -> R.drawable.portion_sugar
+                    "tea_cocoa_milk" -> R.drawable.tea_cocoa_milk
+                    "vinaigrette" -> R.drawable.vinaigrette
+                    "assorted_sauces" -> R.drawable.assorted_sauces
+                    "rice_noodles_seafood" -> R.drawable.rice_noodles_seafood
+                    else -> R.drawable.placeholder // Default placeholder image
+                }
+            }
 
