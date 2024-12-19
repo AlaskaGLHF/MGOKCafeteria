@@ -5,8 +5,10 @@ package com.example.mgokcafeteria
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.clickable
@@ -128,13 +130,6 @@ class MainActivity : ComponentActivity() {
                         MainScreen(navController = navController)
                     }
                     composable(
-                        "meal/{mealTypeId}",
-                        arguments = listOf(navArgument("mealTypeId") { type = NavType.IntType })
-                    ) { backStackEntry ->
-                        val mealTypeId = backStackEntry.arguments?.getInt("mealTypeId") ?: 0
-                        MealScreen(mealTypeId = mealTypeId, selectedMealID = 0, navController = navController)
-                    }
-                    composable(
                         "meal/{mealTypeId}/{mealNumber}",
                         arguments = listOf(
                             navArgument("mealTypeId") { type = NavType.IntType },
@@ -150,7 +145,7 @@ class MainActivity : ComponentActivity() {
                         arguments = listOf(navArgument("itemIndex") { type = NavType.IntType })
                     ) { backStackEntry ->
                         val itemIndex = backStackEntry.arguments?.getInt("itemIndex") ?: 0
-                        val menuItem = menuItems[itemIndex]  // Retrieve the menu item from the list
+                        val menuItem = menuItems[itemIndex]
                         DetailsScreen(menuItem = menuItem, onBack = { navController.popBackStack() })
                     }
                 }
@@ -164,22 +159,34 @@ fun MainScreen(navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.White)
             .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "МГОК Столовая",
-            fontSize = 24.sp,
+            fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
+            color = Color.Black,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
         mealTypes.forEach { mealType ->
             Button(
-                onClick = { navController.navigate("meal/${mealType.id}") },
-                modifier = Modifier.padding(vertical = 8.dp)
+                onClick = {
+                    navController.navigate("meal/${mealType.id}/0")
+                },
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth()
+                    .height(70.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color.Black
+                ),
+                border = BorderStroke(2.dp, Color.DarkGray),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Text(text = mealType.name)
+                Text(text = mealType.name, fontSize = 20.sp)
             }
         }
     }
@@ -192,23 +199,18 @@ fun MealScreen(mealTypeId: Int, selectedMealID: Int, navController: NavHostContr
         .map { it.mealID }
         .distinct()
 
-    // Set the default selected meal to the smallest mealID which should be the first meal
-    var selectedMealIDState by remember {
-        mutableStateOf(mealNumbers.minOrNull() ?: 0) // Defaults to 0 if mealNumbers is empty
-    }
-
+    var selectedMealIDState by remember { mutableStateOf(selectedMealID) }
     val filteredMenuItems = menuItems.filter {
         it.mealType.id == mealTypeId && it.mealID == selectedMealIDState
     }
 
-    // Rest of your MealScreen composable
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Text(
                 text = "МГОК Столовая",
-                fontSize = 24.sp,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center
+                fontSize = 32.sp,
+                color = Color.Black,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -253,14 +255,49 @@ fun MealScreen(mealTypeId: Int, selectedMealID: Int, navController: NavHostContr
 }
 
 @Composable
+fun MealNumberCard(mealNumber: Int, isSelected: Boolean, onClick: () -> Unit) {
+    val borderColor = if (isSelected) Color.Black else Color.DarkGray
+    val backgroundColor = if (isSelected) Color.Black else Color.White
+    val textColor = if (isSelected) Color.White else Color.Black
+
+    Card(
+        modifier = Modifier
+            .size(100.dp)
+            .clickable(onClick = onClick)
+            .border(2.dp, borderColor, RoundedCornerShape(8.dp)),
+        colors = CardDefaults.cardColors(
+            containerColor = backgroundColor,
+            contentColor = textColor
+        ),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = "Обед №$mealNumber",
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center,
+                color = textColor
+            )
+        }
+    }
+}
+
+@Composable
 fun MenuItemCard(menuItem: MenuItem, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .border(2.dp, Color.DarkGray, RoundedCornerShape(8.dp)),
         shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(8.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+            contentColor = Color.Black
+        )
     ) {
         Column(
             modifier = Modifier.padding(8.dp),
@@ -277,6 +314,7 @@ fun MenuItemCard(menuItem: MenuItem, onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = menuItem.name,
+                color = Color.Black,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 14.sp
@@ -284,40 +322,28 @@ fun MenuItemCard(menuItem: MenuItem, onClick: () -> Unit) {
         }
     }
 }
-
-@Composable
-fun MealNumberCard(mealNumber: Int, isSelected: Boolean, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .size(100.dp)
-            .clickable(onClick = onClick),
-        colors = if (isSelected) {
-            CardDefaults.cardColors(containerColor = Color(0xFFE0F7FA))
-        } else {
-            CardDefaults.cardColors(containerColor = Color.White)
-        },
-        elevation = CardDefaults.cardElevation()
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(
-                text = "Обед №$mealNumber",
-                fontSize = 16.sp,
-                textAlign = TextAlign.Center,
-                color = if (isSelected) Color.Black else Color.Gray
-            )
-        }
-    }
-}
-
 @Composable
 fun DetailsScreen(menuItem: MenuItem, onBack: () -> Unit) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Button(onClick = onBack) {
-            Text("Назад")
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(16.dp)
+    ) {
+        Button(
+            onClick = onBack,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .border(2.dp, Color.DarkGray, RoundedCornerShape(8.dp)),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.LightGray,
+                contentColor = Color.Black
+            ),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text("Назад", color = Color.Black)
         }
+
         Spacer(modifier = Modifier.height(16.dp))
         Image(
             painter = painterResource(id = getImageResource(menuItem.imagePath)),
@@ -329,14 +355,22 @@ fun DetailsScreen(menuItem: MenuItem, onBack: () -> Unit) {
             contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(menuItem.name, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Text(
+            text = menuItem.name,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            color = Color.Black
+        )
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Белки: ${menuItem.proteins} г, Жиры: ${menuItem.fats} г, Углеводы: ${menuItem.carbs} г")
-        Text("Калории: ${menuItem.calories} ккал")
+        Text("Белки: ${menuItem.proteins} г", color = Color.Black)
+        Text("Жиры: ${menuItem.fats} г", color = Color.Black)
+        Text("Углеводы: ${menuItem.carbs} г", color = Color.Black)
+        Text("Калории: ${menuItem.calories} ккал", color = Color.Black)
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Ингредиенты: ${menuItem.ingredients}")
+        Text("Ингредиенты: ${menuItem.ingredients}", color = Color.Black)
     }
 }
+
 
 
             // Helper function to map image path to drawable resource
