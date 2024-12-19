@@ -187,17 +187,21 @@ fun MainScreen(navController: NavHostController) {
 
 @Composable
 fun MealScreen(mealTypeId: Int, selectedMealID: Int, navController: NavHostController) {
-    var selectedMealIDState by remember { mutableStateOf(selectedMealID) }
-
     val mealNumbers = menuItems
         .filter { it.mealType.id == mealTypeId }
         .map { it.mealID }
         .distinct()
 
+    // Set the default selected meal to the smallest mealID which should be the first meal
+    var selectedMealIDState by remember {
+        mutableStateOf(mealNumbers.minOrNull() ?: 0) // Defaults to 0 if mealNumbers is empty
+    }
+
     val filteredMenuItems = menuItems.filter {
         it.mealType.id == mealTypeId && it.mealID == selectedMealIDState
     }
 
+    // Rest of your MealScreen composable
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Text(
@@ -236,10 +240,9 @@ fun MealScreen(mealTypeId: Int, selectedMealID: Int, navController: NavHostContr
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                filteredMenuItems.forEachIndexed { index, menuItem ->
+                filteredMenuItems.forEach { menuItem ->
                     item {
                         MenuItemCard(menuItem = menuItem) {
-                            // Navigate with the index of the item in the entire list, not just filtered
                             navController.navigate("details/${menuItems.indexOf(menuItem)}")
                         }
                     }
