@@ -146,11 +146,12 @@ class MainActivity : ComponentActivity() {
                         MealScreen(mealTypeId = mealTypeId, selectedMealID = mealNumber, navController = navController)
                     }
                     composable(
-                        "details/{mealID}",
-                        arguments = listOf(navArgument("mealID") { type = NavType.IntType })
+                        "details/{itemIndex}",
+                        arguments = listOf(navArgument("itemIndex") { type = NavType.IntType })
                     ) { backStackEntry ->
-                        val mealID = backStackEntry.arguments?.getInt("mealID") ?: 0
-                        DetailsScreen(menuItems = menuItems, mealID = mealID, onBack = { navController.popBackStack() })
+                        val itemIndex = backStackEntry.arguments?.getInt("itemIndex") ?: 0
+                        val menuItem = menuItems[itemIndex]  // Retrieve the menu item from the list
+                        DetailsScreen(menuItem = menuItem, onBack = { navController.popBackStack() })
                     }
                 }
             }
@@ -235,10 +236,11 @@ fun MealScreen(mealTypeId: Int, selectedMealID: Int, navController: NavHostContr
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                filteredMenuItems.forEach { menuItem ->
+                filteredMenuItems.forEachIndexed { index, menuItem ->
                     item {
                         MenuItemCard(menuItem = menuItem) {
-                            navController.navigate(route = "details/${menuItem.mealID}")
+                            // Navigate with the index of the item in the entire list, not just filtered
+                            navController.navigate("details/${menuItems.indexOf(menuItem)}")
                         }
                     }
                 }
@@ -246,6 +248,7 @@ fun MealScreen(mealTypeId: Int, selectedMealID: Int, navController: NavHostContr
         }
     }
 }
+
 @Composable
 fun MenuItemCard(menuItem: MenuItem, onClick: () -> Unit) {
     Card(
@@ -307,37 +310,28 @@ fun MealNumberCard(mealNumber: Int, isSelected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun DetailsScreen(menuItems: List<MenuItem>, mealID: Int, onBack: () -> Unit) {
-    val menuItem = menuItems.firstOrNull { it.mealID == mealID }
-
-    if (menuItem != null) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-            Button(onClick = onBack) {
-                Text("Назад")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Image(
-                painter = painterResource(id = getImageResource(menuItem.imagePath)),
-                contentDescription = menuItem.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(16.dp)),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(menuItem.name, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Белки: ${menuItem.proteins} г, Жиры: ${menuItem.fats} г, Углеводы: ${menuItem.carbs} г")
-            Text("Калории: ${menuItem.calories} ккал")
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Ингредиенты: ${menuItem.ingredients}")
+fun DetailsScreen(menuItem: MenuItem, onBack: () -> Unit) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Button(onClick = onBack) {
+            Text("Назад")
         }
-    } else {
-        Text(
-            "Блюдо не найдено",
-            modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center)
+        Spacer(modifier = Modifier.height(16.dp))
+        Image(
+            painter = painterResource(id = getImageResource(menuItem.imagePath)),
+            contentDescription = menuItem.name,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(RoundedCornerShape(16.dp)),
+            contentScale = ContentScale.Crop
         )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(menuItem.name, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text("Белки: ${menuItem.proteins} г, Жиры: ${menuItem.fats} г, Углеводы: ${menuItem.carbs} г")
+        Text("Калории: ${menuItem.calories} ккал")
+        Spacer(modifier = Modifier.height(8.dp))
+        Text("Ингредиенты: ${menuItem.ingredients}")
     }
 }
 
